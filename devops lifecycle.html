@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DevOps Lifecycle — Visual Diagram</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#06b6d4; --muted:#94a3b8; --glass: rgba(255,255,255,0.04);
+      --stg1:#ef4444; --stg2:#f97316; --stg3:#f59e0b; --stg4:#eab308; --stg5:#10b981; --stg6:#06b6d4; --stg7:#3b82f6; --stg8:#8b5cf6;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; background:linear-gradient(180deg,var(--bg),#071024); color:#e6eef6; display:flex; align-items:center; justify-content:center; padding:28px;
+    }
+    .wrap{width:1100px; max-width:100%; display:grid; grid-template-columns: 1fr 360px; gap:24px; align-items:start}
+    .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.02)); border-radius:16px; padding:20px; box-shadow: 0 6px 30px rgba(2,6,23,0.6);}
+
+    header{display:flex; align-items:center; gap:14px; margin-bottom:10px}
+    header h1{font-size:20px; margin:0}
+    header p{margin:0; color:var(--muted); font-size:13px}
+
+    /* SVG container */
+    .diagram{display:flex; align-items:center; justify-content:center; padding:20px}
+    svg{max-width:100%; height:auto;}
+
+    .info{padding:18px}
+    .stage-title{font-weight:700; font-size:18px; margin-bottom:6px}
+    .stage-desc{color:var(--muted); line-height:1.45}
+
+    .list{margin-top:14px}
+    .stage-item{display:flex; gap:10px; align-items:center; padding:8px; border-radius:10px; cursor:pointer}
+    .dot{width:14px;height:14px;border-radius:4px}
+    .stage-name{font-weight:600}
+
+    .controls{display:flex; gap:8px; margin-top:12px}
+    button{background:var(--glass); border:1px solid rgba(255,255,255,0.03); color:var(--muted); padding:8px 10px; border-radius:8px; cursor:pointer}
+    button:active{transform:translateY(1px)}
+
+    footer.small{color:var(--muted); font-size:12px; margin-top:8px}
+
+    /* Hover effects for segments */
+    .segment{transition:transform .28s ease, filter .2s ease; transform-origin:center; cursor:pointer}
+    .segment:hover{transform:scale(1.03); filter:drop-shadow(0 8px 20px rgba(2,6,23,0.6));}
+
+    /* Responsive smaller view */
+    @media (max-width:980px){
+      .wrap{grid-template-columns: 1fr;}
+      .card.right{order:-1}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700">Dev</div>
+        <div>
+          <h1>DevOps Lifecycle — Interactive Diagram</h1>
+          <p>Plan → Develop → Build → Test → Release → Deploy → Operate → Monitor (click any slice)</p>
+        </div>
+      </header>
+
+      <div class="diagram" aria-hidden="false">
+        <!-- Interactive SVG wheel with 8 slices -->
+        <svg id="wheel" viewBox="-250 -250 500 500" width="600" height="600" role="img" aria-label="DevOps lifecycle wheel">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </feMerge>
+          </filter>
+        </defs>
+
+          <!-- central circle -->
+          <circle cx="0" cy="0" r="60" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+          <text x="0" y="6" text-anchor="middle" font-size="14" fill="#cfeafd">DevOps</text>
+
+          <!-- Eight slices created with paths. Each has a data-stage attribute and id -->
+          <!-- We'll draw slices using JS but include paths with placeholder positions for clarity -->
+
+        </svg>
+      </div>
+
+      <div style="padding:12px 20px 0 20px;">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div class="controls">
+            <button id="prev">◀ Prev</button>
+            <button id="next">Next ▶</button>
+            <button id="auto">Auto Rotate</button>
+          </div>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">Tip: hover & click slices for details</div>
+        </div>
+
+        <div class="list" id="legend">
+          <!-- legend items inserted by JS -->
+        </div>
+
+        <div class="small" style="margin-top:12px;color:var(--muted);font-size:13px">This single-file demo uses SVG + JS to visualize the stages with labels and descriptions. It's responsive and accessible.</div>
+      </div>
+    </div>
+
+    <aside class="card right" style="height:100%;">
+      <div class="info" aria-live="polite">
+        <div class="stage-title" id="title">Click a stage</div>
+        <div class="stage-desc" id="desc">Select any slice of the wheel to see a short description of that DevOps lifecycle stage, key activities, and common tools.</div>
+
+        <div style="margin-top:14px;">
+          <strong style="display:block;margin-bottom:8px">Quick notes</strong>
+          <ul style="color:var(--muted);line-height:1.6">
+            <li><strong>Flow:</strong> stages are iterative — monitoring and feedback drive planning.</li>
+            <li><strong>Automation:</strong> CI/CD pipelines, automated tests and infra-as-code accelerate these stages.</li>
+            <li><strong>Tools:</strong> examples include Jira, Git, Jenkins/GitHub Actions, Docker, Kubernetes, Prometheus.</li>
+          </ul>
+        </div>
+
+        <footer class="small">Want this as a standalone file? Save it as <code>devops-lifecycle.html</code> and host it as a static site.</footer>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // Stage data
+    const stages = [
+      {id:'plan', name:'Plan', color:getComputedStyle(document.documentElement).getPropertyValue('--stg1').trim(), desc:'Define requirements, priorities, roadmap, and backlog. Tools: Jira, Confluence, Aha!'},
+      {id:'develop', name:'Develop', color:getComputedStyle(document.documentElement).getPropertyValue('--stg2').trim(), desc:'Write code, review, branch & merge. Tools: Git, VS Code, GitHub.'},
+      {id:'build', name:'Build', color:getComputedStyle(document.documentElement).getPropertyValue('--stg3').trim(), desc:'Compile, package artifacts, build container images. Tools: Maven, Gradle, Docker.'},
+      {id:'test', name:'Test', color:getComputedStyle(document.documentElement).getPropertyValue('--stg4').trim(), desc:'Automated tests, unit/integration/e2e to validate quality. Tools: Jest, JUnit, Selenium.'},
+      {id:'release', name:'Release', color:getComputedStyle(document.documentElement).getPropertyValue('--stg5').trim(), desc:'Approve and create release artifacts; manage versions.'},
+      {id:'deploy', name:'Deploy', color:getComputedStyle(document.documentElement).getPropertyValue('--stg6').trim(), desc:'Deploy artifacts to environments (staging, production). Tools: Helm, Terraform, kubectl.'},
+      {id:'operate', name:'Operate', color:getComputedStyle(document.documentElement).getPropertyValue('--stg7').trim(), desc:'Run and operate services, manage incidents, capacity planning.'},
+      {id:'monitor', name:'Monitor', color:getComputedStyle(document.documentElement).getPropertyValue('--stg8').trim(), desc:'Observability, metrics, logs, tracing. Tools: Prometheus, Grafana, ELK.'},
+    ];
+
+    const svg = document.getElementById('wheel');
+    const R = 190; // outer radius
+    const innerR = 60;
+
+    function polarToCartesian(cx, cy, r, angleDeg){
+      const a = (angleDeg-90) * Math.PI/180.0;
+      return [cx + (r * Math.cos(a)), cy + (r * Math.sin(a))];
+    }
+
+    function describeArc(cx, cy, r1, r2, startAngle, endAngle){
+      const [x1,y1] = polarToCartesian(cx,cy,r2,endAngle);
+      const [x2,y2] = polarToCartesian(cx,cy,r2,startAngle);
+      const [x3,y3] = polarToCartesian(cx,cy,r1,startAngle);
+      const [x4,y4] = polarToCartesian(cx,cy,r1,endAngle);
+      const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
+      return `M ${x1} ${y1} A ${r2} ${r2} 0 ${largeArc} 0 ${x2} ${y2} L ${x3} ${y3} A ${r1} ${r1} 0 ${largeArc} 1 ${x4} ${y4} Z`;
+    }
+
+    // Create slices
+    const angleSize = 360 / stages.length;
+    stages.forEach((s, i) => {
+      const start = i * angleSize;
+      const end = start + angleSize;
+      const pathD = describeArc(0,0, innerR, R, start, end);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('fill', s.color);
+      path.setAttribute('stroke','rgba(0,0,0,0.12)');
+      path.setAttribute('stroke-width','1');
+      path.setAttribute('class','segment');
+      path.dataset.stage = s.id;
+      path.id = 'seg-'+s.id;
+      svg.appendChild(path);
+
+      // label
+      const midAngle = start + angleSize/2;
+      const [lx,ly] = polarToCartesian(0,0, (innerR+R)/2, midAngle);
+      const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+      text.setAttribute('x', lx);
+      text.setAttribute('y', ly);
+      text.setAttribute('text-anchor','middle');
+      text.setAttribute('dominant-baseline','middle');
+      text.setAttribute('font-size','12');
+      text.setAttribute('fill','#041428');
+      text.setAttribute('font-weight','700');
+      text.textContent = s.name;
+      svg.appendChild(text);
+    });
+
+    // Legend
+    const legend = document.getElementById('legend');
+    stages.forEach(s => {
+      const item = document.createElement('div');
+      item.className = 'stage-item';
+      item.dataset.stage = s.id;
+      item.innerHTML = `<div class='dot' style='background:${s.color}'></div><div>
+        <div class='stage-name'>${s.name}</div>
+        <div style='color:var(--muted);font-size:13px'>${s.desc.split('.').slice(0,1)}.</div>
+      </div>`;
+      item.addEventListener('mouseenter', () => highlightSlice(s.id));
+      item.addEventListener('mouseleave', clearHighlight);
+      item.addEventListener('click', () => selectStage(s.id));
+      legend.appendChild(item);
+    });
+
+    // interaction handlers
+    function highlightSlice(id){
+      clearHighlight();
+      const el = document.getElementById('seg-'+id);
+      if(el){ el.style.transform = 'scale(1.04)'; el.style.filter='url(#glow)'; }
+    }
+    function clearHighlight(){
+      document.querySelectorAll('.segment').forEach(p=>{ p.style.transform=''; p.style.filter=''; });
+    }
+
+    function selectStage(id){
+      const s = stages.find(x=>x.id===id);
+      document.getElementById('title').textContent = s.name;
+      document.getElementById('desc').textContent = s.desc;
+
+      // focus visual
+      document.querySelectorAll('.segment').forEach(p=>{ p.style.opacity='0.32'; });
+      const el = document.getElementById('seg-'+id);
+      if(el){ el.style.opacity='1'; el.style.transform='scale(1.06)'; el.style.filter='drop-shadow(0 14px 30px rgba(2,6,23,0.6))'; }
+    }
+
+    // attach click handlers to SVG paths
+    document.querySelectorAll('.segment').forEach(p => {
+      p.addEventListener('mouseenter', () => {
+        const id = p.dataset.stage;
+        highlightSlice(id);
+      });
+      p.addEventListener('mouseleave', clearHighlight);
+      p.addEventListener('click', () => selectStage(p.dataset.stage));
+    });
+
+    // Next / Prev buttons
+    let idx = 0;
+    function showIndex(i){ idx = (i + stages.length) % stages.length; selectStage(stages[idx].id); }
+    document.getElementById('next').addEventListener('click', ()=> showIndex(idx+1));
+    document.getElementById('prev').addEventListener('click', ()=> showIndex(idx-1));
+
+    // Auto rotate
+    let auto=null;
+    document.getElementById('auto').addEventListener('click', ()=>{
+      if(auto){ clearInterval(auto); auto=null; document.getElementById('auto').textContent='Auto Rotate'; }
+      else{ auto = setInterval(()=> showIndex(idx+1), 2200); document.getElementById('auto').textContent='Stop'; }
+    });
+
+    // Initialize - show first stage
+    showIndex(0);
+
+    // Accessibility: keyboard
+    window.addEventListener('keydown', (e)=>{
+      if(e.key==='ArrowRight') showIndex(idx+1);
+      if(e.key==='ArrowLeft') showIndex(idx-1);
+      if(e.key==='Home') showIndex(0);
+      if(e.key==='End') showIndex(stages.length-1);
+    });
+
+  </script>
+</body>
+</html>
